@@ -38,7 +38,7 @@ jobs:
           echo "THEOS=$THEOS" >> $GITHUB_ENV
           if [ ! -d "$THEOS" ]; then
             echo "::group::Cloning Theos"
-            git clone --depth 1 https://github.com/theos/theos.git "$THEOS" --quiet
+            git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/theos/theos.git "$THEOS"
             echo "::endgroup::"
           fi
 
