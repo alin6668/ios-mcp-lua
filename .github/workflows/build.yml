@@ -47,6 +47,7 @@ jobs:
           ls "$THEOS/bin/" | head -10
 
       - name: Build (${{ matrix.scheme }})
+        id: build
         run: |
           export THEOS=$HOME/theos
 
@@ -63,23 +64,45 @@ jobs:
           fi
 
           echo "=== THEOS: $THEOS ==="
-          echo "=== Xcode version: $(xcodebuild -version 2>/dev/null | head -1 || echo 'not found') ==="
-          echo "=== SDK path: $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || echo 'not found') ==="
+          echo "=== Xcode: $(xcodebuild -version 2>/dev/null | head -1 || echo 'none') ==="
+          echo "=== SDK: $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || echo 'none') ==="
+          ls "$THEOS/sdks/" 2>/dev/null || echo "(no manual SDKs)"
+          echo "=== PWD: $(pwd) ==="
+          echo "=== Files: $(ls *.m *.x 2>/dev/null | wc -l) .m/.x files ==="
+          ls third_party/lua/lua-5.4.7/src/*.c 2>/dev/null | wc -l | xargs echo "Lua .c files:"
 
-          # Check Theos SDK availability
-          echo "=== Theos SDKs ==="
-          ls -la "$THEOS/sdks/" 2>/dev/null || echo "  (no manual SDKs - Theos will use Xcode SDK)"
+          # Test toolchain
+          echo "=== Toolchain test ==="
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)
+          if [ -n "$SDK" ]; then
+            echo "int main(){return 0;}" | clang -x c - -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -o /tmp/test_build 2>&1 && echo "C toolchain: OK" || echo "C toolchain: FAIL"
+            echo '#import <Foundation/Foundation.h>
+int main(){return 0;}' | clang -x objective-c - -fobjc-arc -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -framework Foundation -o /tmp/test_objc 2>&1 && echo "ObjC toolchain: OK" || echo "ObjC toolchain: FAIL"
+            echo '#include "lua.h"
+int main(){return 0;}' | clang -x c - -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -Ithird_party/lua/lua-5.4.7/src -o /tmp/test_lua 2>&1 && echo "Lua header: OK" || echo "Lua header: FAIL"
+          fi
 
-          echo "=== Make version ==="
-          make --version 2>/dev/null | head -1 || echo "make not found"
+          # Dry-run to check Makefile syntax
+          echo "=== Makefile dry-run ==="
+          make -n package FINALPACKAGE=1 2>&1 | head -50 || echo "Dry-run failed"
 
           # Clean
-          echo "=== Cleaning ==="
           make clean 2>/dev/null || true
 
-          # Build
-          echo "=== Building ==="
-          make package FINALPACKAGE=1
+          # Build (capture all output to log)
+          echo "=== Building (full log) ==="
+          make package FINALPACKAGE=1 > /tmp/build.log 2>&1; RC=$?
+          cat /tmp/build.log
+          echo "=== Build exit code: $RC ==="
+          exit $RC
+
+      - name: Upload build log (on failure)
+        if: failure() && steps.build.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.scheme }}
+          path: /tmp/build.log
+          retention-days: 7
 
       - name: Verify artifacts
         run: |
