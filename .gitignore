@@ -1,0 +1,25 @@
+# Theos build artifacts
+.theos/
+obj/
+packages/
+
+# IDE
+.vscode/
+.idea/
+*.xcworkspace
+*.xcuserdata
+*.xcodeproj
+
+# macOS
+.DS_Store
+Thumbs.db
+*.dSYM.zip
+*.dSYM
+
+# Build
+build/
+*.deb
+*.o
+
+# Dependency dirs
+node_modules/
