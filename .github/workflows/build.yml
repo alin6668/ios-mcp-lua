@@ -41,10 +41,23 @@ jobs:
             git clone --depth 1 https://github.com/theos/theos.git "$THEOS" --quiet
             echo "::endgroup::"
           fi
+
+          # Set up iOS SDK for Theos
+          SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)
+          if [ -n "$SDK_PATH" ]; then
+            mkdir -p "$THEOS/sdks"
+            ln -sf "$SDK_PATH" "$THEOS/sdks/iPhoneOS.sdk"
+            echo "Linked SDK: $SDK_PATH -> $THEOS/sdks/iPhoneOS.sdk"
+          else
+            echo "WARNING: No iOS SDK found via xcrun"
+          fi
+
           # Ensure theos scripts are executable
           chmod +x "$THEOS/bin/"* 2>/dev/null || true
           echo "Theos installed at $THEOS"
           ls "$THEOS/bin/" | head -10
+          echo "Theos SDKs:"
+          ls -la "$THEOS/sdks/" 2>/dev/null || echo "(empty)"
 
       - name: Build (${{ matrix.scheme }})
         id: build
@@ -63,34 +76,23 @@ jobs:
             echo "=== Building with scheme: rootless ==="
           fi
 
-          echo "=== THEOS: $THEOS ==="
-          echo "=== Xcode: $(xcodebuild -version 2>/dev/null | head -1 || echo 'none') ==="
-          echo "=== SDK: $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || echo 'none') ==="
-          ls "$THEOS/sdks/" 2>/dev/null || echo "(no manual SDKs)"
-          echo "=== PWD: $(pwd) ==="
-          echo "=== Files: $(ls *.m *.x 2>/dev/null | wc -l) .m/.x files ==="
-          ls third_party/lua/lua-5.4.7/src/*.c 2>/dev/null | wc -l | xargs echo "Lua .c files:"
+          echo "THEOS=$THEOS"
+          echo "SDK=$(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || echo NOT-FOUND)"
+          echo "Xcode=$(xcodebuild -version 2>/dev/null | head -1 || echo NOT-FOUND)"
+          echo "PWD=$(pwd)"
+          echo "Make=$(make --version 2>/dev/null | head -1)"
 
-          # Test toolchain
-          echo "=== Toolchain test ==="
-          SDK=$(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)
-          if [ -n "$SDK" ]; then
-            printf 'int main(){return 0;}\n' | clang -x c - -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -o /tmp/test_build 2>&1 && echo "C toolchain: OK" || echo "C toolchain: FAIL"
-            printf '#import <Foundation/Foundation.h>\nint main(){return 0;}\n' | clang -x objective-c - -fobjc-arc -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -framework Foundation -o /tmp/test_objc 2>&1 && echo "ObjC toolchain: OK" || echo "ObjC toolchain: FAIL"
-            printf '#include "lua.h"\nint main(){return 0;}\n' | clang -x c - -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -Ithird_party/lua/lua-5.4.7/src -o /tmp/test_lua 2>&1 && echo "Lua header: OK" || echo "Lua header: FAIL"
-          fi
-
-          # Dry-run to check Makefile syntax
-          echo "=== Makefile dry-run ==="
-          make -n package FINALPACKAGE=1 2>&1 | head -50 || echo "Dry-run failed"
+          # Dry-run to check Makefile can be parsed
+          echo "=== Dry-run ==="
+          make -n package FINALPACKAGE=1 2>&1 | tail -20
 
           # Clean
           make clean 2>/dev/null || true
 
-          # Build (capture all output to log)
-          echo "=== Building (full log) ==="
+          # Build with log capture
+          echo "=== Building ==="
           make package FINALPACKAGE=1 > /tmp/build.log 2>&1; RC=$?
-          cat /tmp/build.log
+          tail -80 /tmp/build.log
           echo "=== Build exit code: $RC ==="
           exit $RC
 
