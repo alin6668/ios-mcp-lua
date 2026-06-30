@@ -48,7 +48,7 @@ TWEAK_NAME = ios-mcp
 BUNDLE_NAME = iosmcpprefs
 
 ios-mcp_FILES = Tweak.x MCPServer.m MCPGoIOSIntegration.m MCPLogger.m HIDManager.m ScreenManager.m ClipboardManager.m AppManager.m AccessibilityManager.m TextInputManager.m FileSystemManager.m LogManager.m OCRManager.m MCPProcessUtil.m MCPAXQueryContext.m MCPAXRemoteContextResolver.m MCPUIElementSerializer.m MCPUIElementsFacade.m MCPAXAttributeBridge.m MCPAXNodeSource.m LuaManager.m $(LUASRC)
-ios-mcp_CFLAGS = -fobjc-arc -Wno-unused-function -Wno-deprecated-declarations -I$(THEOS_PROJECT_DIR)/third_party/lua/lua-5.4.7/src -DLUA_USE_IOS
+ios-mcp_CFLAGS = -fobjc-arc -Wno-unused-function -Wno-deprecated-declarations -Wno-incompatible-pointer-types -Ithird_party/lua/lua-5.4.7/src -DLUA_USE_IOS
 ios-mcp_FRAMEWORKS = IOKit UIKit CoreGraphics QuartzCore MobileCoreServices AVFoundation Security Vision
 
 ifeq ($(THEOS_PACKAGE_SCHEME),roothide)

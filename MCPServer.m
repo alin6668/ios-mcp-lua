@@ -4651,4 +4651,108 @@ static BOOL MCPSetSystemBrightness(CGFloat brightness) {
     }
 }
 
+// ---- go-ios integration tool stubs ----
+// These operations require the go-ios companion binary on the controlling host.
+// They are declared so the tweak compiles cleanly; actual execution is proxied.
+
+- (NSDictionary *)executeGetSysmontap:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"get_sysmontap is not implemented in this build"];
+}
+
+- (NSDictionary *)executeListProcesses:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"list_processes is not implemented in this build"];
+}
+
+- (NSDictionary *)executeSetLocation:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"set_location is not implemented in this build"];
+}
+
+- (NSDictionary *)executeClearLocation:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"clear_location is not implemented in this build"];
+}
+
+- (NSDictionary *)executeRebootDevice:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"reboot_device is not implemented in this build"];
+}
+
+- (NSDictionary *)executeShutdownDevice:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"shutdown_device is not implemented in this build"];
+}
+
+- (NSDictionary *)executeEnableDevmode:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"enable_devmode is not implemented in this build"];
+}
+
+- (NSDictionary *)executeDisableMemlimit:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"disable_memlimit is not implemented in this build"];
+}
+
+- (NSDictionary *)executeAssistiveTouch:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"assistive_touch is not implemented in this build"];
+}
+
+- (NSDictionary *)executeVoiceOver:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"voiceover is not implemented in this build"];
+}
+
+- (NSDictionary *)executeZoom:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"zoom is not implemented in this build"];
+}
+
+- (NSDictionary *)executeSetLanguage:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"set_language is not implemented in this build"];
+}
+
+- (NSDictionary *)executeSetLocale:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"set_locale is not implemented in this build"];
+}
+
+- (NSDictionary *)executeGetNetworkInfo:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"get_network_info is not implemented in this build"];
+}
+
+- (NSDictionary *)executeEnableWifi:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"enable_wifi is not implemented in this build"];
+}
+
+- (NSDictionary *)executeEnableBluetooth:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"enable_bluetooth is not implemented in this build"];
+}
+
+- (NSDictionary *)executeGetProfiles:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"get_profiles is not implemented in this build"];
+}
+
+- (NSDictionary *)executeInstallProfile:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"install_profile is not implemented in this build"];
+}
+
+- (NSDictionary *)executeRemoveProfile:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"remove_profile is not implemented in this build"];
+}
+
+- (NSDictionary *)executeSpringboardIcons:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"springboard_icons is not implemented in this build"];
+}
+
+- (NSDictionary *)executePcapStart:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"pcap_start is not implemented in this build"];
+}
+
+- (NSDictionary *)executePcapStop:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"pcap_stop is not implemented in this build"];
+}
+
+- (NSDictionary *)executeGetAutolock:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"get_autolock is not implemented in this build"];
+}
+
+- (NSDictionary *)executeSetAutolock:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"set_autolock is not implemented in this build"];
+}
+
+- (NSDictionary *)executeMobilegestalt:(id)reqId args:(NSDictionary *)args {
+    return [self mcpError:reqId code:-32603 message:@"mobilegestalt is not implemented in this build"];
+}
+
 @end
