@@ -5,7 +5,6 @@
 #import <UIKit/UIKit.h>
 #import <sys/sysctl.h>
 #import <sys/utsname.h>
-#import <sys/loadavg.h>
 #import <mach/mach.h>
 #import <mach/processor_info.h>
 #import <mach/mach_host.h>
@@ -206,24 +205,13 @@ static NSDictionary *DTGetMemoryStats(void) {
 // ============================================================================
 
 static NSDictionary *DTGetLoadAverage(void) {
-    struct loadavg load;
-    size_t size = sizeof(load);
-
-    if (sysctlbyname("vm.loadavg", &load, &size, NULL, 0) < 0) {
-        // Fallback: try getloadavg()
-        double avg[3];
-        if (getloadavg(avg, 3) < 0) return nil;
-        return @{
-            @"load_1min": @(avg[0]),
-            @"load_5min": @(avg[1]),
-            @"load_15min": @(avg[2]),
-        };
-    }
-
+    // getloadavg() is available on iOS and returns the system load averages
+    double avg[3];
+    if (getloadavg(avg, 3) < 0) return nil;
     return @{
-        @"load_1min": @((double)load.ldavg[0] / (double)load.fscale),
-        @"load_5min": @((double)load.ldavg[1] / (double)load.fscale),
-        @"load_15min": @((double)load.ldavg[2] / (double)load.fscale),
+        @"load_1min": @(avg[0]),
+        @"load_5min": @(avg[1]),
+        @"load_15min": @(avg[2]),
     };
 }
 

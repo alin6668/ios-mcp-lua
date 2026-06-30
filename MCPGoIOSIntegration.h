@@ -1,5 +1,7 @@
 #import <Foundation/Foundation.h>
 
+@class MCPServer;
+
 @interface MCPServer (GoIOSIntegration)
 
 // System monitoring
