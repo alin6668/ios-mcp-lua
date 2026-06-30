@@ -49,17 +49,37 @@ jobs:
       - name: Build (${{ matrix.scheme }})
         run: |
           export THEOS=$HOME/theos
-          export THEOS_PACKAGE_SCHEME=${{ matrix.scheme }}
-          export FINALPACKAGE=1
 
-          echo "=== Building with scheme: $THEOS_PACKAGE_SCHEME ==="
+          # Rootful requires empty/unset THEOS_PACKAGE_SCHEME (not "rootful")
+          if [ "${{ matrix.scheme }}" = "rootful" ]; then
+            unset THEOS_PACKAGE_SCHEME
+            echo "=== Building with scheme: rootful (default) ==="
+          elif [ "${{ matrix.scheme }}" = "roothide" ]; then
+            export THEOS_PACKAGE_SCHEME=roothide
+            echo "=== Building with scheme: roothide ==="
+          else
+            export THEOS_PACKAGE_SCHEME=rootless
+            echo "=== Building with scheme: rootless ==="
+          fi
+
           echo "=== THEOS: $THEOS ==="
-          
-          # Clean first to ensure fresh build
+          echo "=== Xcode version: $(xcodebuild -version 2>/dev/null | head -1 || echo 'not found') ==="
+          echo "=== SDK path: $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || echo 'not found') ==="
+
+          # Check Theos SDK availability
+          echo "=== Theos SDKs ==="
+          ls -la "$THEOS/sdks/" 2>/dev/null || echo "  (no manual SDKs - Theos will use Xcode SDK)"
+
+          echo "=== Make version ==="
+          make --version 2>/dev/null | head -1 || echo "make not found"
+
+          # Clean
+          echo "=== Cleaning ==="
           make clean 2>/dev/null || true
-          
+
           # Build
-          make package FINALPACKAGE=1 2>&1
+          echo "=== Building ==="
+          make package FINALPACKAGE=1
 
       - name: Verify artifacts
         run: |
