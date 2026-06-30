@@ -24,7 +24,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scheme: [rootless, rootful, roothide]
+        # roothide requires external roothide library - use manual dispatch for that
+        scheme: [rootless, rootful]
 
     steps:
       - name: Checkout
@@ -68,9 +69,6 @@ jobs:
           if [ "${{ matrix.scheme }}" = "rootful" ]; then
             unset THEOS_PACKAGE_SCHEME
             echo "=== Building with scheme: rootful (default) ==="
-          elif [ "${{ matrix.scheme }}" = "roothide" ]; then
-            export THEOS_PACKAGE_SCHEME=roothide
-            echo "=== Building with scheme: roothide ==="
           else
             export THEOS_PACKAGE_SCHEME=rootless
             echo "=== Building with scheme: rootless ==="
@@ -80,19 +78,16 @@ jobs:
           echo "SDK=$(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || echo NOT-FOUND)"
           echo "Xcode=$(xcodebuild -version 2>/dev/null | head -1 || echo NOT-FOUND)"
           echo "PWD=$(pwd)"
-          echo "Make=$(make --version 2>/dev/null | head -1)"
-
-          # Dry-run to check Makefile can be parsed
-          echo "=== Dry-run ==="
-          make -n package FINALPACKAGE=1 2>&1 | tail -20
 
           # Clean
           make clean 2>/dev/null || true
 
-          # Build with log capture
+          # Build - output to console (last 100 lines) AND step summary (full log)
           echo "=== Building ==="
-          make package FINALPACKAGE=1 > /tmp/build.log 2>&1; RC=$?
-          tail -80 /tmp/build.log
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          make package FINALPACKAGE=1 2>&1 | tee -a $GITHUB_STEP_SUMMARY /tmp/build.log | tail -100
+          RC=${PIPESTATUS[0]}
+          echo '```' >> $GITHUB_STEP_SUMMARY
           echo "=== Build exit code: $RC ==="
           exit $RC
 
