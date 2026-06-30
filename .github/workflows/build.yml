@@ -75,11 +75,9 @@ jobs:
           echo "=== Toolchain test ==="
           SDK=$(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)
           if [ -n "$SDK" ]; then
-            echo "int main(){return 0;}" | clang -x c - -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -o /tmp/test_build 2>&1 && echo "C toolchain: OK" || echo "C toolchain: FAIL"
-            echo '#import <Foundation/Foundation.h>
-int main(){return 0;}' | clang -x objective-c - -fobjc-arc -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -framework Foundation -o /tmp/test_objc 2>&1 && echo "ObjC toolchain: OK" || echo "ObjC toolchain: FAIL"
-            echo '#include "lua.h"
-int main(){return 0;}' | clang -x c - -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -Ithird_party/lua/lua-5.4.7/src -o /tmp/test_lua 2>&1 && echo "Lua header: OK" || echo "Lua header: FAIL"
+            printf 'int main(){return 0;}\n' | clang -x c - -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -o /tmp/test_build 2>&1 && echo "C toolchain: OK" || echo "C toolchain: FAIL"
+            printf '#import <Foundation/Foundation.h>\nint main(){return 0;}\n' | clang -x objective-c - -fobjc-arc -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -framework Foundation -o /tmp/test_objc 2>&1 && echo "ObjC toolchain: OK" || echo "ObjC toolchain: FAIL"
+            printf '#include "lua.h"\nint main(){return 0;}\n' | clang -x c - -arch arm64 -isysroot "$SDK" -miphoneos-version-min=13.0 -Ithird_party/lua/lua-5.4.7/src -o /tmp/test_lua 2>&1 && echo "Lua header: OK" || echo "Lua header: FAIL"
           fi
 
           # Dry-run to check Makefile syntax
@@ -97,7 +95,7 @@ int main(){return 0;}' | clang -x c - -arch arm64 -isysroot "$SDK" -miphoneos-ve
           exit $RC
 
       - name: Upload build log (on failure)
-        if: failure() && steps.build.outcome == 'failure'
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ matrix.scheme }}
